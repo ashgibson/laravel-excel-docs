@@ -102,3 +102,41 @@ We can adjust the year by using the `forYear` method:
 ```php
 return (new InvoicesExport)->forYear(2018)->download('invoices.xlsx');
 ```
+
+## Use an existing query object
+
+If you have built an existing query that you would like to use in the export you can pass it in to the constructor, assign to a class variable and then return that variable from the `forQuery` method.
+
+```php
+namespace App\Exports;
+
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\Exportable;
+
+class InvoicesExport implements FromQuery
+{
+    use Exportable;
+    
+    private $query;
+
+    public function __construct($query)
+    {
+        $this->query = $query;
+    }
+
+    public function query()
+    {
+        return $this->query;
+    }
+}
+```
+
+```php
+$query = Invoice::query()->forYear(2018);
+
+if (request('format') === 'export') {
+   return (new InvoicesExport($query))->download('invoices.xlsx');
+}
+
+return $query->get();
+```
